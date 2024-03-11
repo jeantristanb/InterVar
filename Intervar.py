@@ -536,6 +536,18 @@ def check_annovar_result():
 # table_annovar.pl example/ex1.avinput humandb/ -buildver hg19 -out myanno -remove -protocol refGene,esp6500siv2_all,1000g2015aug_all,avsnp147,ljb26_all,CLINSIG,gnomad_genome   -operation  g,f,f,f,f,f,f   -nastring . -csvout
     inputft= paras['inputfile_type']
     annovar_options=" "
+    dbname=paras['database_names'].replace(',',' ').strip().split()
+    # update  from previon
+    if len(dbname) > 0 :
+       protocol=",".join(dbname)
+       dboperation=paras['database_operations'].replace(',',' ').strip().split()
+       if len(dboperation) != dbname :
+             print("Error : The dbname len [ %s ] are different of dboperation [ %s ] ", protocol, dboperation)
+             sys.exit(2)
+       operation=",".join(dboperation)
+    else :
+        protocol="refGene,esp6500siv2_all,1000g2015aug_all,avsnp147,dbnsfp42a,clinvar_20210501,gnomad_genome,dbscsnv11,rmsk,ensGene,knownGene"
+        operation="g,f,f,f,f,f,f,f,r,g,g"
     if re.findall('true',paras['otherinfo'], flags=re.IGNORECASE)  :
         annovar_options=annovar_options+"--otherinfo " 
     if re.findall('true',paras['onetranscript'], flags=re.IGNORECASE) :
@@ -547,11 +559,11 @@ def check_annovar_result():
         if paras['skip_annovar'] != True:
             sys.exit()
     if inputft.lower() == 'avinput' :
-        cmd="perl "+paras['table_annovar']+" "+paras['inputfile']+" "+paras['database_locat']+" -buildver "+paras['buildver']+" -remove -out "+ paras['outfile']+" -protocol refGene,esp6500siv2_all,1000g2015aug_all,avsnp147,dbnsfp42a,clinvar_20210501,gnomad_genome,dbscsnv11,rmsk,ensGene,knownGene  -operation  g,f,f,f,f,f,f,f,r,g,g   -nastring ."+annovar_options
+        cmd="perl "+paras['table_annovar']+" "+paras['inputfile']+" "+paras['database_locat']+" -buildver "+paras['buildver']+" -remove -out "+ paras['outfile']+" -protocol "+protocol+"  -operation  "+operation+"  -nastring ."+annovar_options
         print("%s" %cmd)
         os.system(cmd)
     if inputft.lower() == 'vcf' :
-        cmd="perl "+paras['table_annovar']+" "+paras['inputfile']+".avinput "+paras['database_locat']+" -buildver "+paras['buildver']+" -remove -out "+ paras['outfile']+" -protocol refGene,esp6500siv2_all,1000g2015aug_all,avsnp147,dbnsfp42a,clinvar_20210501,gnomad_genome,dbscsnv11,rmsk,ensGene,knownGene   -operation  g,f,f,f,f,f,f,f,r,g,g   -nastring ."+annovar_options
+        cmd="perl "+paras['table_annovar']+" "+paras['inputfile']+".avinput "+paras['database_locat']+" -buildver "+paras['buildver']+" -remove -out "+ paras['outfile']+" -protocol "+protocol+"  -operation  "+operation+"  -nastring ."+annovar_options
         print("%s" %cmd)
         os.system(cmd)
     if inputft.lower() == 'vcf_m' :
@@ -1913,6 +1925,10 @@ def main():
 
     parser.add_option("--input_type", dest="input_type", action="store",
                   help="The input file type, it can be  AVinput(Annovar's format),VCF(VCF with single sample),VCF_m(VCF with multiple samples)", metavar="AVinput")
+    parser.add_option("--databases_names", dest="databases_names", action="store",
+                  help="databases names", metavar="")
+    parser.add_option("--database_operations", dest="database_operations", action="store",
+                  help="database operation same len than database_name ", metavar="AVinput")
 
     parser.add_option("-o", "--output", dest="output", action="store",
                   help="The prefix of output file which contains the results, the file of results will be as [$$prefix].intervar ", metavar="example/myanno")
@@ -1985,7 +2001,12 @@ def main():
         else:
             print("Error: The config file [ %s ] is not here,please check the path of your config file." % options.config)
             sys.exit()
-
+    paras['database_names'] = ""
+    paras['database_operations'] = ""
+    if option.database_names != None :
+        paras['database_names'] = option.database_names
+    if  option.database_operations != None :
+        paras['database_operations'] = option.database_operations
     if options.buildver != None:
         paras['buildver']=options.buildver
     if options.database_locat != None:
