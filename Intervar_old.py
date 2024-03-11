@@ -541,7 +541,7 @@ def check_annovar_result():
     if len(dbname) > 0 :
        protocol=",".join(dbname)
        dboperation=paras['database_operations'].replace(',',' ').strip().split()
-       if len(dboperation) != len(dbname) :
+       if len(dboperation) != dbname :
              print("Error : The dbname len [ %s ] are different of dboperation [ %s ] ", protocol, dboperation)
              sys.exit(2)
        operation=",".join(dboperation)
