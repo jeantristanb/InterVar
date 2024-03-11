@@ -1925,7 +1925,7 @@ def main():
 
     parser.add_option("--input_type", dest="input_type", action="store",
                   help="The input file type, it can be  AVinput(Annovar's format),VCF(VCF with single sample),VCF_m(VCF with multiple samples)", metavar="AVinput")
-    parser.add_option("--databases_names", dest="databases_names", action="store",
+    parser.add_option("--database_names", dest="database_names", action="store",
                   help="databases names", metavar="")
     parser.add_option("--database_operations", dest="database_operations", action="store",
                   help="database operation same len than database_name ", metavar="AVinput")
@@ -2003,9 +2003,9 @@ def main():
             sys.exit()
     paras['database_names'] = ""
     paras['database_operations'] = ""
-    if option.database_names != None :
+    if options.database_names != None :
         paras['database_names'] = option.database_names
-    if  option.database_operations != None :
+    if  options.database_operations != None :
         paras['database_operations'] = option.database_operations
     if options.buildver != None:
         paras['buildver']=options.buildver
