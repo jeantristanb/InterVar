@@ -456,6 +456,10 @@ def read_datasets():
     return
 
 
+#def check_1000g(db) :
+  ## for year 
+#  tmp=db.split('_') 
+ #if len(tmp)==3 :
 
 def check_downdb():
     path=paras['database_locat']
@@ -481,8 +485,14 @@ def check_downdb():
         file_name=dbs
         #if dbs=="1000g2014oct":
         #    file_name="ALL.sites.2014_10"
-        if dbs=="1000g2015aug":
-            file_name="ALL.sites.2015_08" # hg19_ALL.sites.2015_08.txt
+        if dbs.split('_')[0]=="1000g2015aug":
+            tmp=dbs.split('_')
+            print(tmp)
+            if len(tmp) ==1 :
+               Pop="ALL"
+            else :
+               Pop = tmp[1].upper()
+            file_name=Pop+".sites.2015_08" # hg19_ALL.sites.2015_08.txt
 
         dataset_file=paras['database_locat']+"/"+paras['buildver']+"_"+file_name+".txt"
         if dbs != 'rmsk':
@@ -512,6 +522,9 @@ def check_input():
             print("Warning: Begin to convert your vcf file of %s to AVinput of Annovar ..." % paras['inputfile'])
             print("%s" %cmd)
             os.system(cmd)
+            if os.path.isfile(paras['inputfile']+".avinput") == False :
+                   print("error conversion of %s fail "%paras['inputfile']+"\nexit\t") 
+                   sys.exit(2)
         else:
             print("Warning: The Annovar file [ %s ] is not here,please download ANNOVAR firstly: http://www.openbioinformatics.org/annovar" 
                     % paras['convert2annovar'])
@@ -542,7 +555,7 @@ def check_annovar_result():
        protocol=",".join(dbname)
        dboperation=paras['database_operations'].replace(',',' ').strip().split()
        if len(dboperation) != len(dbname) :
-             print("Error : The dbname len [ %s ] are different of dboperation [ %s ] ", protocol, dboperation)
+             print("Error : The dbname len [ %s ] are different of dboperation [ %s ] " %  protocol, dboperation)
              sys.exit(2)
        operation=",".join(dboperation)
     else :
@@ -570,7 +583,7 @@ def check_annovar_result():
         for f in glob.iglob(paras['outfile']+"*.avinput"): 
             print("INFO: Begin to annotate sample file of %s ...." %(f))
             new_outfile=re.sub(".avinput","",f)
-            cmd="perl "+paras['table_annovar']+" "+f+" "+paras['database_locat']+" -buildver "+paras['buildver']+" -remove -out "+ new_outfile +" -protocol refGene,esp6500siv2_all,1000g2015aug_all,avsnp147,dbnsfp42a,clinvar_20210501,gnomad_genome,dbscsnv11,rmsk,ensGene,knownGene   -operation  g,f,f,f,f,f,f,f,r,g,g   -nastring ."+annovar_options
+            cmd="perl "+paras['table_annovar']+" "+f+" "+paras['database_locat']+" -buildver "+paras['buildver']+" -remove -out "+ new_outfile + " -protocol "+protocol+"  -operation  "+operation +"  -nastring ."+annovar_options
             print("%s" %cmd)
             os.system(cmd)
         
